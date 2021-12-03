@@ -83,13 +83,13 @@ void part2()
 
 		// should've used:
 		// std::erase_if(most_common, [&](auto l) { return l.test(idx - 1) != mc; });
-		/*most_common.erase(std::remove_if(
+		most_common.erase(std::remove_if(
 			most_common.begin(),
 			most_common.end(),
 			[idx,mc](Line l) {
 				return l.test(idx - 1) != mc;
 			}
-		), most_common.end());*/
+		), most_common.end());
 		
 		idx--;
 		if (most_common.size() == 1)
