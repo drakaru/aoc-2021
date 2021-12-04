@@ -6,7 +6,6 @@
 #include <cstdint>
 #include <vector>
 #include <bitset>
-#include <numeric>
 #include <algorithm>
 
 using namespace std::string_literals;
