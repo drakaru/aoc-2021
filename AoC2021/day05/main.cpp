@@ -28,12 +28,11 @@ void add_point(auto& points, auto x, auto y)
 	}
 }
 
-void parse_line(std::string line, auto& x1, auto& y1, auto& x2, auto& y2)
+void parse_line(auto line, auto& x1, auto& y1, auto& x2, auto& y2)
 {
 	auto si = line.find('-');
 	line[si] = ',';
 	line[si + 1] = ' ';
-	std::erase_if(line, [](auto c) { return c == ' '; });
 	std::transform(line.begin(), line.end(), line.begin(), [](auto i) { return i == ',' ? ' ' : i; });
 	std::stringstream ls(line);
 	
