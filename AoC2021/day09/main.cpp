@@ -117,7 +117,7 @@ uint64_t less_ugly_flood(auto const& lines, auto& checked, auto x, auto y, auto 
 	{
 		std::vector<Point> found_this{};
 
-		for (auto const& p : found)
+		for (auto const& p : found_prev)
 		{
 			std::array<Point, 4> to_check = {
 				Point(p.x - 1, p.y),
@@ -125,13 +125,13 @@ uint64_t less_ugly_flood(auto const& lines, auto& checked, auto x, auto y, auto 
 				Point(p.x, p.y - 1),
 				Point(p.x, p.y + 1),
 			};
-			for (auto const& o : to_check)
-			{
+
+			std::for_each(to_check.begin(), to_check.end(), [&](auto const& o) {
 				if (!check(o) && value_at(o) < '9')
 				{
-					found2.push_back(o);
+					found_this.push_back(o);
 				}
-			}
+			});
 		}
 
 		found_prev = found_this;
