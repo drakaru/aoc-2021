@@ -14,7 +14,6 @@ struct Point
 {
 	size_t x;
 	size_t y;
-	Point() = default;
 	Point(size_t x, size_t y) { this->x = x; this->y = y; };
 };
 
@@ -54,7 +53,6 @@ uint64_t flood(auto const& lines, auto& checked, auto x, auto y, auto w, auto h)
 {
 	uint64_t total = 1;
 
-	std::vector<bool> checked(w * h);
 	std::vector<Point> found{ Point(x, y) };
 
 	checked[y * w + x] = true;
@@ -126,7 +124,8 @@ uint64_t less_ugly_flood(auto const& lines, auto& checked, auto x, auto y, auto 
 				Point(p.x, p.y + 1),
 			};
 
-			for (auto const& o : to_check) {
+			for (auto const& o : to_check) 
+			{
 				if (!check(o) && value_at(o) < '9')
 				{
 					found_this.push_back(o);
