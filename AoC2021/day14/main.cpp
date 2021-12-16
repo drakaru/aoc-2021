@@ -3,13 +3,11 @@
 #include <string>
 #include <fstream>
 #include <array>
-#include <cstdint>
-#include <numeric>
-#include <vector>
 #include <limits>
 #include <set>
 #include <map>
 #include <unordered_map>
+#include <algorithm>
 
 using Pair = std::pair<char, char>;
 using Rule = std::pair<std::array<char, 2>, char>;
@@ -29,7 +27,6 @@ Polymer from_string(std::string const& polymer_str, RuleSet const& rules)
 	return polymer;
 }
 
-
 Polymer polymer_advance(Polymer const& polymer, RuleSet const& rules)
 {
 	Polymer new_polymer{};
@@ -38,109 +35,72 @@ Polymer polymer_advance(Polymer const& polymer, RuleSet const& rules)
 	{
 		char a = rule.first[0];
 		char b = rule.first[1];
-		char c = rule.second;
+		char c = rule.second;//insert
 
-		Pair ab = { a, b };
-		Pair ac = { a, c };
-		Pair cb = { c, b };
-		
+		Pair ab = {a,b};
 		if (polymer.contains(ab))
 		{
 			size_t ab_count = polymer.at(ab);
-			new_polymer[ac] += ab_count;
-			new_polymer[cb] += ab_count;
+			new_polymer[{a,c}] += ab_count;
+			new_polymer[{c,b}] += ab_count;
 		}
 	}
 	
 	return new_polymer;
 }
 
-size_t poly_low_high(Polymer const& polymer, std::string const& original_polymer)
+size_t poly_count(Polymer const& polymer, std::string const& original_polymer)
 {
+	// map the counts of the first character of each pair
+	// suppose ruleset consists of pairs AB and AD, then count(A) = count(AB) + count(AD)
 	std::unordered_map<char, size_t> counts{};
-	for (auto const& what : polymer)
-	{
-		counts[what.first.first] += what.second;
-	}
+
+	// counting only the first character of each pair misses the final character of the polymer
+	// this will always match the final character of the original polymer, so take it from there
 	counts[original_polymer[original_polymer.size() - 1]]++;
-
-	size_t low_count = std::numeric_limits<size_t>::max();
-	size_t high_count = 0;
-
-	for (auto const& c : counts)
-	{
-		auto s = c.second;
-		if (s != 0)
-		{
-			if (s > high_count)
-			{
-				high_count = s;
-			}
-			if (s < low_count)
-			{
-				low_count = s;
-			}
-		}
-	}
-	return high_count - low_count;
-}
-
-void part1()
-{
-	auto f = std::ifstream("day14.txt");
-	std::string polymer;
-	std::string rule;
-	std::getline(f, polymer);
-	std::getline(f, rule);
-
-	RuleSet ruleSet{};
 	
-	while (std::getline(f, rule))
+	for (auto const& pair_size : polymer)
 	{
-		ruleSet.insert({ {rule[0], rule[1]}, rule[6] });
+		counts[pair_size.first.first] += pair_size.second;
 	}
 
-	Polymer p = from_string(polymer, ruleSet);
+	const auto [low_count, high_count] = std::minmax_element(
+		cbegin(counts), 
+		cend(counts), 
+		[](auto const& a, auto const& b) { return a.second < b.second; }
+	);
 
-	for (size_t iteration = 0; iteration < 10; ++iteration)
-	{
-		p = polymer_advance(p, ruleSet);
-	}
-
-	auto result = poly_low_high(p, polymer);
-
-	std::cout << "part1 = " << result << "\n";
-}
-
-void part2()
-{
-	auto f = std::ifstream("day14.txt");
-	std::string polymer;
-	std::string rule;
-	std::getline(f, polymer);
-	std::getline(f, rule);
-
-	RuleSet ruleSet{};
-
-	while (std::getline(f, rule))
-	{
-		ruleSet.insert({ {rule[0], rule[1]}, rule[6] });
-	}
-
-	Polymer p = from_string(polymer, ruleSet);
-
-	for (size_t iteration = 0; iteration < 40; ++iteration)
-	{
-		p = polymer_advance(p, ruleSet);
-	}
-
-	auto result = poly_low_high(p, polymer);
-
-	std::cout << "part2 = " << result << "\n";
+	return high_count->second - low_count->second;
 }
 
 int main()
 {
-	part1();
-	part2();
+	auto f = std::ifstream("day14.txt");
+	std::string original_polymer;
+	std::string rule;
+	std::getline(f, original_polymer);
+	std::getline(f, rule);
+
+	RuleSet rules{};
+
+	// fixed size rules, ie: CN -> C
+	while (std::getline(f, rule))
+	{
+		rules.insert({ {rule[0], rule[1]}, rule[6] });
+	}
+
+	Polymer polymer = from_string(original_polymer, rules);
+
+	auto advance_and_count = [&](size_t const times) -> size_t
+	{
+		for (size_t iteration = 0; iteration < times; ++iteration)
+		{
+			polymer = polymer_advance(polymer, rules);
+		}
+		return poly_count(polymer, original_polymer);
+	};
+	
+	std::cout << "part1: " << advance_and_count(10) << "\n";
+	std::cout << "part2: " << advance_and_count(30) << "\n";
+
 }
