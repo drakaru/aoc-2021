@@ -75,20 +75,22 @@ size_t poly_count(Polymer const& polymer, std::string const& original_polymer)
 
 int main()
 {
-	auto f = std::ifstream("day14.txt");
 	std::string original_polymer;
-	std::string rule;
-	std::getline(f, original_polymer);
-	std::getline(f, rule);
-
 	RuleSet rules{};
-
-	// fixed size rules, ie: CN -> C
-	while (std::getline(f, rule))
 	{
-		rules.insert({ {rule[0], rule[1]}, rule[6] });
-	}
+		auto f = std::ifstream("day14.txt");
 
+		std::string rule;
+		std::getline(f, original_polymer);
+		std::getline(f, rule);
+		
+		while (std::getline(f, rule))
+		{
+			// fixed size rules, ie: CN -> C
+			rules.insert({ {rule[0], rule[1]}, rule[6] });
+		}
+	}
+	
 	Polymer polymer = from_string(original_polymer, rules);
 
 	auto advance_and_count = [&](size_t const times) -> size_t
